@@ -1,1 +1,1 @@
-# base from https://github.com/rocklau/sc-sample-inventory
+# base from https://github.com/SocketCluster/sc-sample-inventory
