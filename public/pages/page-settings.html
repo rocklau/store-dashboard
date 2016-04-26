@@ -1,0 +1,178 @@
+
+<dom-module id="page-settings">
+<style is="custom-style">
+    body {
+      background-color: var(--paper-grey-50);
+    }
+
+    #cards {
+      @apply(--layout-vertical);
+      @apply(--center-justified);
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    paper-card {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .avatar {
+      display: inline-block;
+      height: 64px;
+      width: 64px;
+      border-radius: 50%;
+      background: var(--paper-pink-500);
+      color: white;
+      line-height: 64px;
+      font-size: 30px;
+      text-align: center;
+    }
+
+    .fancy .title {
+      position: absolute;
+      top: 30px;
+      left: 100px;
+      color: var(--paper-indigo-500);
+    }
+
+    .fancy img {
+      width: 100%;
+    }
+
+    .fancy .big {
+      font-size: 22px;
+      padding: 8px 0 16px;
+      color: var(--google-grey-500);
+    }
+
+    .fancy .medium {
+      font-size: 16px;
+      padding-bottom: 8px;
+    }
+
+    .pink {
+      --paper-card-header-color: var(--paper-pink-500);
+    }
+
+
+
+    paper-toggle-button {
+       margin-bottom: 40px;
+       display: block;
+     }
+     paper-toggle-button:last-child {
+       margin-bottom: 0;
+     }
+     paper-toggle-button.blue {
+       --paper-toggle-button-checked-bar-color:  var(--paper-light-blue-500);
+       --paper-toggle-button-checked-button-color:  var(--paper-light-blue-500);
+       --paper-toggle-button-checked-ink-color: var(--paper-light-blue-500);
+       --paper-toggle-button-unchecked-bar-color:  var(--paper-light-blue-900);
+       --paper-toggle-button-unchecked-button-color:  var(--paper-light-blue-900);
+       --paper-toggle-button-unchecked-ink-color: var(--paper-light-blue-900);
+     }
+     paper-toggle-button.red {
+       --paper-toggle-button-checked-bar-color:  var(--paper-red-500);
+       --paper-toggle-button-checked-button-color:  var(--paper-red-500);
+       --paper-toggle-button-checked-ink-color: var(--paper-red-500);
+       --paper-toggle-button-unchecked-bar-color:  var(--paper-red-900);
+       --paper-toggle-button-unchecked-button-color:  var(--paper-red-900);
+       --paper-toggle-button-unchecked-ink-color: var(--paper-red-900);
+     }
+     paper-toggle-button.green {
+       --paper-toggle-button-checked-bar-color:  var(--paper-green-500);
+       --paper-toggle-button-checked-button-color:  var(--paper-green-500);
+       --paper-toggle-button-checked-ink-color: var(--paper-green-500);
+       --paper-toggle-button-unchecked-bar-color:  var(--paper-green-900);
+       --paper-toggle-button-unchecked-button-color:  var(--paper-green-900);
+       --paper-toggle-button-unchecked-ink-color: var(--paper-green-900);
+     }
+     paper-toggle-button.orange {
+       --paper-toggle-button-checked-bar-color:  var(--paper-orange-500);
+       --paper-toggle-button-checked-button-color:  var(--paper-orange-500);
+       --paper-toggle-button-checked-ink-color: var(--paper-orange-500);
+       --paper-toggle-button-unchecked-bar-color:  var(--paper-orange-900);
+       --paper-toggle-button-unchecked-button-color:  var(--paper-orange-900);
+       --paper-toggle-button-unchecked-ink-color: var(--paper-orange-900);
+     }
+  </style>
+  <template>
+    <sc-field id="user-store" resource-type="User" resource-id="{{userId}}" resource-field="store" resource-value="{{userStore}}" ></sc-field>
+    <sc-field id="user-email" resource-type="User" resource-id="{{userId}}" resource-field="email" resource-value="{{userEmail}}" ></sc-field>
+    <sc-field id="user-daily" resource-type="User" resource-id="{{userId}}" resource-field="daily" resource-value="{{userDaily}}" ></sc-field>
+    <sc-field id="user-weekly" resource-type="User" resource-id="{{userId}}" resource-field="weekly" resource-value="{{userWeekly}}" ></sc-field>
+    <sc-field id="user-monthly" resource-type="User" resource-id="{{userId}}" resource-field="monthly" resource-value="{{userMonthly}}" ></sc-field>
+<sc-field id="store-tablecount" resource-type="StoreInfo" resource-id="{{userStore}}" resource-field="TableCount" resource-value="{{tableCount}}" ></sc-field>
+    <paper-card heading="{{userStore}} Subscription">
+      <div class="card-content">
+    <paper-input value="{{userStore}}"  label="Restaurant Name" on-change="saveStoreValue" data-save-to="user-store"></paper-input>    
+     <paper-toggle-button  checked="{{userDaily}}"  on-change="saveDailyValue" data-save-to="user-daily">Daily </paper-toggle-button>
+     <paper-toggle-button checked="{{userWeekly}}"  on-change="saveWeeklyValue" data-save-to="user-weekly">Weekly </paper-toggle-button>
+     <paper-toggle-button checked="{{userMonthly}}"  on-change="saveMonthlyValue" data-save-to="user-monthly">Monthly </paper-toggle-button>
+     <gold-email-input required auto-validate="false" error-message="Please enter your email" label="Email Address" value="{{userEmail}}"  on-change="saveEmailValue" data-save-to="user-email">
+     </gold-email-input>
+      </div>
+
+    </paper-card>
+
+  </template>
+
+  <script>
+    // element registration
+    Polymer({
+      is: 'page-settings',
+
+
+      // add properties and methods on the element's prototype
+      properties: {
+        // declare properties for the element's public API
+        userId: {
+          type: String,
+          notify:true
+
+        },
+
+        userEmail: {
+          type: String
+        },
+        userStore: {
+          type: String,
+          notify:true
+        }
+      },
+      observers: [
+         'updateInfo(userId,userStore)'
+       ],
+       updateInfo: function(userId,userStore) {
+         console.log('page-settings');
+         console.log(userId);
+         console.log(userStore);
+
+       }
+      ,saveStoreValue: function (event) {
+        var targetModel = this.$['user-store'];
+         targetModel.update(event.target.value);
+      },
+      saveEmailValue: function (event) {
+        var targetModel = this.$['user-email'];
+         targetModel.update(event.target.value);
+      },
+      saveDailyValue: function (event) {
+        var targetModel = this.$['user-daily'];
+        console.log(event.target.checked);
+         targetModel.update(event.target.checked);
+      },
+      saveWeeklyValue: function (event) {
+        var targetModel = this.$['user-weekly'];
+
+         targetModel.update(event.target.checked);
+      },
+      saveMonthlyValue: function (event) {
+        var targetModel = this.$['user-monthly'];
+         targetModel.update(event.target.checked);
+      }
+    });
+  </script>
+</dom-module>

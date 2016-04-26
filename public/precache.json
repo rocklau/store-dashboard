@@ -1,0 +1,7 @@
+{
+  "cacheId": "x3esdfsd",
+  "defaultCacheStrategy": "fastest",
+  "disabled": false,
+  "precache": ["index.html", "index.build.js"],
+  "precacheFingerprint": "23dfsxsdfsdfsd"
+}

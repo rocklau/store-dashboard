@@ -1,0 +1,183 @@
+<dom-module id="page-dashboard">
+  <style is="custom-style">
+    body {
+      background-color: var(--paper-grey-50);
+    }
+
+    #cards {
+      @apply(--layout-vertical);
+      @apply(--center-justified);
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    paper-card {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .avatar {
+      display: inline-block;
+      height: 64px;
+      width: 64px;
+      border-radius: 50%;
+      background: var(--paper-pink-500);
+      color: white;
+      line-height: 64px;
+      font-size: 30px;
+      text-align: center;
+    }
+
+    .fancy .title {
+      position: absolute;
+      top: 30px;
+      left: 100px;
+      color: var(--paper-indigo-500);
+    }
+
+    .fancy img {
+      width: 100%;
+    }
+
+    .fancy .big {
+      font-size: 22px;
+      padding: 8px 0 16px;
+      color: var(--google-grey-500);
+    }
+
+    .fancy .medium {
+      font-size: 16px;
+      padding-bottom: 8px;
+    }
+
+    .pink {
+      --paper-card-header-color: var(--paper-pink-500);
+    }
+
+    paper-toggle-button {
+      margin-bottom: 40px;
+      display: block;
+    }
+
+    paper-toggle-button:last-child {
+      margin-bottom: 0;
+    }
+
+    paper-toggle-button.blue {
+      --paper-toggle-button-checked-bar-color: var(--paper-light-blue-500);
+      --paper-toggle-button-checked-button-color: var(--paper-light-blue-500);
+      --paper-toggle-button-checked-ink-color: var(--paper-light-blue-500);
+      --paper-toggle-button-unchecked-bar-color: var(--paper-light-blue-900);
+      --paper-toggle-button-unchecked-button-color: var(--paper-light-blue-900);
+      --paper-toggle-button-unchecked-ink-color: var(--paper-light-blue-900);
+    }
+
+    paper-toggle-button.red {
+      --paper-toggle-button-checked-bar-color: var(--paper-red-500);
+      --paper-toggle-button-checked-button-color: var(--paper-red-500);
+      --paper-toggle-button-checked-ink-color: var(--paper-red-500);
+      --paper-toggle-button-unchecked-bar-color: var(--paper-red-900);
+      --paper-toggle-button-unchecked-button-color: var(--paper-red-900);
+      --paper-toggle-button-unchecked-ink-color: var(--paper-red-900);
+    }
+
+    paper-toggle-button.green {
+      --paper-toggle-button-checked-bar-color: var(--paper-green-500);
+      --paper-toggle-button-checked-button-color: var(--paper-green-500);
+      --paper-toggle-button-checked-ink-color: var(--paper-green-500);
+      --paper-toggle-button-unchecked-bar-color: var(--paper-green-900);
+      --paper-toggle-button-unchecked-button-color: var(--paper-green-900);
+      --paper-toggle-button-unchecked-ink-color: var(--paper-green-900);
+    }
+
+    paper-toggle-button.orange {
+      --paper-toggle-button-checked-bar-color: var(--paper-orange-500);
+      --paper-toggle-button-checked-button-color: var(--paper-orange-500);
+      --paper-toggle-button-checked-ink-color: var(--paper-orange-500);
+      --paper-toggle-button-unchecked-bar-color: var(--paper-orange-900);
+      --paper-toggle-button-unchecked-button-color: var(--paper-orange-900);
+      --paper-toggle-button-unchecked-ink-color: var(--paper-orange-900);
+    }
+  </style>
+  <template>
+
+    <sc-field id="store-tablecount" resource-type="StoreInfo" resource-id="{{userStore}}" resource-field="TableCount" resource-value="{{notifyInfo.tableCount}}"></sc-field>
+    <sc-field id="store-tableOpenedCount" resource-type="StoreInfo" resource-id="{{userStore}}" resource-field="TableOpenedCount" resource-value="{{notifyInfo.tableOpenedCount}}"></sc-field>
+    <sc-field id="store-billCost" resource-type="StoreInfo" resource-id="{{userStore}}" resource-field="BillCost" resource-value="{{notifyInfo.billCost}}"></sc-field>
+    <sc-field id="store-billCount" resource-type="StoreInfo" resource-id="{{userStore}}" resource-field="BillCount" resource-value="{{notifyInfo.billCount}}"></sc-field>
+
+    <paper-card>
+      <div class="card-content">
+       <div >
+        <h2>&nbsp;Table&nbsp;Opened:&nbsp;<span  id="notifyInfo-tableOpenedCount">{{notifyInfo.tableOpenedCount}}</span>
+          <br/>&nbsp;Total&nbsp;Tables:&nbsp;<span id="notifyInfo-tableCount">{{notifyInfo.tableCount}} </span></h2>
+        <h2>&nbsp;Total&nbsp;Amount:&nbsp;<span id="notifyInfo-billCost">{{notifyInfo.billCost}}</span>
+          <br/>Number of Bills:&nbsp;<span id="notifyInfo-billCount">{{notifyInfo.billCount}}</span> </h1>
+          </div>          
+      </div>
+    </paper-card>
+  </template>
+
+  <script>
+    // element registration
+    Polymer({
+      is: 'page-dashboard',
+      properties: {
+        userStore: {
+          type: String,
+          notify: true
+        },
+        notifyInfo:{
+          type:Object,
+          value:function () {
+            return {
+             }
+          }
+
+        },
+        isLoaded:{type:Boolean,value:false}
+      },
+      observers: [
+        'valueChanged(notifyInfo.*)'
+      ],
+      valueChanged: function(changeRecord) {
+
+        if (!this.isLoaded) {
+          return;
+        }
+        if (  changeRecord.path.indexOf('notifyInfo.')<0) {
+          return;
+        }
+
+      var id=  '#'+changeRecord.path;
+      id=id.replace('.','-');
+
+      document.querySelector(id).style.color='#F44336';
+          setTimeout(function(){
+            document.querySelector(id).style.color='#212121';
+          },1000);
+
+      }
+      ,
+      attached: function() {
+        var self=this;
+        setTimeout(function () {
+            document.querySelector('page-dashboard').loadData();
+        } ,10000);
+
+      },
+      loadData: function() {
+        this.isLoaded=true;
+
+        document.querySelector('page-dashboard #store-tablecount').loadValue();
+        document.querySelector('page-dashboard #store-tableOpenedCount').loadValue();
+        document.querySelector('page-dashboard #store-billCost').loadValue();
+        document.querySelector('page-dashboard #store-billCount').loadValue();
+        setTimeout(function () {
+            document.querySelector('page-dashboard').loadData();
+        } ,10000);
+      }
+    });
+  </script>
+</dom-module>

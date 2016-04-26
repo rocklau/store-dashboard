@@ -1,0 +1,126 @@
+
+<dom-module id="page-report-topsales">
+  <style>
+    .heading {
+      display: inline-block;
+      margin-bottom: 30px;
+    }
+
+    .content-body {
+      max-width: 500px;
+    }
+
+    .content-container {
+      width: 100%;
+      display: flex;
+      -webkit-display: flex;
+      flex-direction: column;
+      -webkit-flex-direction: column;
+      padding: 20px;
+    }
+
+    .content-row {
+      display: flex;
+      -webkit-display: flex;
+      width: 100%;
+    }
+
+    .content-col {
+      box-sizing: border-box;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .content-col-half {
+      box-sizing: border-box;
+      display: inline-block;
+      width: 50%;
+    }
+    google-chart {
+  height:500px ;
+  width: 100%;
+}
+.right-txt{
+  display:block;max-width:100px;text-align:right;
+}
+  </style>
+
+
+  <template>
+    <iron-ajax id="ajaxtopsales" url="/api/topsales"
+     handle-as="json" on-response="showChart" last-response="{{ajaxResponse}}"></iron-ajax>
+    <div class="content-container">
+      <div class="content-body">
+
+        <div class="content-row  ">
+
+          <div class="content-col">
+            Name
+          </div>
+          <div class="content-col">
+              <span class="right-txt">Total </span>
+          </div>
+        </div>
+<hr>
+
+        <template is="dom-repeat" items="{{ajaxResponse}}">
+          <div class="content-row ">
+
+            <div class="content-col">
+              {{item.Name}}
+            </div>
+            <div class="content-col"  >
+             <span class="right-txt">  {{toFixed(item.Total)}} </span>
+            </div>
+          </div>
+
+        </template>
+
+      </div>
+    </div>
+
+    <google-chart
+      type='pie'
+      cols='[{"label":"Name", "type":"string"}, {"label":"Totals", "type":"number"}]'
+      rows='[[chartRows]]'>
+    </google-chart>
+  </template>
+
+  <script>
+    // element registration
+    Polymer({
+      is: 'page-report-topsales',
+      toFixed: function(number) {
+        return number.toFixed(2);
+      },
+      properties:{
+        chartRows:{
+          type:Array,
+          value:[]
+
+        }
+      },
+      behaviors: [
+        Polymer.NeonAnimatableBehavior
+      ]
+      ,
+      mainAction: function() {
+
+        location.href = "#!/";
+
+      },
+      showChart :function(response){
+       var self=this;
+        var data=response.target.lastResponse;
+        if (data) {
+        self.chartRows=   data.map(function(item){
+               return [item.Name,item.Total] ;
+          });
+
+        }
+      }
+
+
+    });
+  </script>
+</dom-module>

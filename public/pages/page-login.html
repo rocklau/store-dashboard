@@ -1,0 +1,87 @@
+
+<dom-module id="page-login">
+
+  <template>
+    <!-- local DOM for your element -->
+
+
+    <span class="error-container">{{error}}</span>
+
+    <paper-input label="username"   value="{{username}}"></paper-input>
+    <paper-input label="password"  value="{{password}}"></paper-input>
+
+    <paper-button class="fancy" raised noink on-tap="login" >Login</paper-button>
+<sc-socket socket="{{socket}}"></sc-socket>
+  </template>
+
+  <script>
+    // element registration
+    Polymer({
+      is: 'page-login',
+
+      // add properties and methods on the element's prototype
+
+      properties: {
+        userId: {
+          type: String,
+          notify: true
+        },
+        username: {
+          type: String,
+          notify: true,
+          value: ''
+        },
+        password: {
+          type: String,
+          value: ''
+        },
+        error: {
+          type: String
+        }
+         ,
+        socket: {
+          type: Object
+        },
+        isAuthenticated: {
+          type: Boolean,
+          notify: true
+        }
+      },
+      observers: [
+         'updateInfo(userId)'
+       ],
+       updateInfo: function(userId) {
+           console.log('page-login');
+         console.log(userId);
+       },
+      login: function() {
+        var self = this;
+
+        var details = {
+          username: this.username,
+          password: this.password
+        };
+        this.socket.emit('login', details, function(err, failure) {
+
+          if (err) {
+            self.error = 'Failed to login due to error: ' + err;
+            self.isAuthenticated = false;
+          } else if (failure && failure.indexOf(' ')>-0) {
+            self.error = failure;
+            self.isAuthenticated = false;
+          } else {
+
+            if (failure)
+            {
+
+             self.userId=failure;
+             console.log("login " + self.userId);
+             localStorage["userId"]=self.userId;
+            }
+            self.isAuthenticated = true;
+          }
+        });
+      }
+    });
+  </script>
+</dom-module>

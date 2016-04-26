@@ -1,0 +1,144 @@
+
+<dom-module id="page-report-summary">
+  <style>
+    .heading {
+      display: inline-block;
+      margin-bottom: 30px;
+    }
+
+    .content-container {
+      width: 100%;
+      display: flex;
+      -webkit-display: flex;
+      flex-direction: column;
+      -webkit-flex-direction: column;
+      padding: 20px;
+      overflow: auto;
+    }
+ .content-body {
+      max-width: 500px;
+    }
+    .content-row {
+      display: flex;
+      -webkit-display: flex;
+      width: 100%;
+    }
+
+    .content-col {
+      box-sizing: border-box;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .content-col-half {
+      box-sizing: border-box;
+      display: inline-block;
+      width: 50%;
+    }
+    google-chart {
+  height:500px ;
+  width: 100%;
+}
+.right-txt{
+  display:block;max-width:100px;text-align:right;
+}
+  </style>
+
+
+  <template>
+
+
+    <iron-ajax id="ajaxsummary"  url="/api/subjects" handle-as="json" on-response="showChart" last-response="{{ajaxResponse}}"></iron-ajax>
+
+
+
+        <div class="content-container">
+
+          <div class="content-body">
+            <div class="content-row  ">
+
+              <div class="content-col">
+                Name
+              </div>
+              <div class="content-col">
+                <span class="right-txt"> Total</span>
+              </div>
+            </div>
+
+   <hr>
+            <template is="dom-repeat" items="{{ajaxResponse}}" >
+              <div class="content-row ">
+
+                <div class="content-col">
+                  {{item.Name}}
+                </div>
+                <div class="content-col"  >
+               <span class="right-txt"> {{totalToFixed(item)}}</span>
+                </div>
+              </div>
+            </template>
+
+
+
+          </div>
+</div>
+        <google-chart
+          type='pie'
+          cols='[{"label":"Name", "type":"string"}, {"label":"Totals", "type":"number"}]'
+          rows='[[chartRows]]'
+          >
+
+        </google-chart>
+
+  </template>
+
+  <script>
+    // element registration
+    Polymer({
+      is: 'page-report-summary',
+      totalToFixed: function(item) {     
+	    if(item.Name=='Cover (Pax)')
+		{
+		  return parseInt(item.Total);
+		}
+        return item.Total.toFixed(2);
+      },
+      mainAction: function() {
+
+        location.href = "#!/";
+
+      },ready :function () {
+
+      ;
+      },
+      showChart :function(response){
+
+       var self=this;
+        var data=response.target.lastResponse;
+        if (data) {
+         var rows=   data.filter(function(item){
+             var code=parseInt(item.Code );
+             return item.Total>0 &&  ( code >= 1001001 && code <= 1002999) && item.Name.indexOf('Net Amount')<0      
+     }).map(function(item){
+               return [item.Name,item.Total] ;
+          });
+           self.chartRows=rows;
+
+        }
+
+      },
+      properties: {
+        // declare properties for the element's public API
+
+        categoryId: {
+          type: String
+        } ,
+         chartRows:{
+            type:Array,
+            value:[]
+
+          }
+      }
+    });
+  </script>
+</dom-module>

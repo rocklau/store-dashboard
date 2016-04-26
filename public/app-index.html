@@ -1,0 +1,172 @@
+
+
+<link rel="import" href="elements.html" >
+
+<link rel="import" href="app-router.html" >
+<link rel="import" href="pages/page-login.html" >
+<link rel="import" href="pages/page-settings.html" >
+<link rel="import" href="pages/page-dashboard.html" >
+<link rel="import" href="pages/page-report-setting.html" >
+<link rel="import" href="pages/page-report-summary.html" >
+<link rel="import" href="pages/page-report-topsales.html" >
+
+
+<script type="text/javascript" src="bower_components/page/page.js" ></script>
+
+
+
+<dom-module id="app-index">
+
+  <template>
+
+        
+
+    <sc-socket socket="{{socket}}"></sc-socket>
+
+    <paper-drawer-panel id="paperDrawerPanel">
+      <paper-header-panel drawer>
+        <paper-toolbar>
+          <div>Menu</div>
+        </paper-toolbar>
+        <div>
+          <paper-icon-item on-tap="goDashboard">
+            <iron-icon icon="home" item-icon></iron-icon> Monitor
+          </paper-icon-item>
+          <paper-icon-item on-tap="goReport">
+            <iron-icon icon="editor:insert-chart" item-icon></iron-icon> Report
+          </paper-icon-item>
+
+          <paper-icon-item on-tap="goSettings">
+            <iron-icon icon="settings" item-icon></iron-icon> Settings
+          </paper-icon-item>
+              <paper-icon-item on-tap="goLogout">
+            <iron-icon icon="exit-to-app" item-icon></iron-icon> Logout
+          </paper-icon-item>
+        </div>
+      </paper-header-panel>
+
+      <paper-scroll-header-panel main id="paperMainPanel">
+        <paper-toolbar>
+          <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
+          <div id="title"> {{title}} </div>
+        </paper-toolbar>
+        <template is="dom-if" if="{{isAuthenticated}}">
+          <app-router id="router">
+            <page-dashboard title="Dashboard"  user-store="{{userStore}}" path="/dashboard"></page-dashboard>
+            <page-settings title="Setting" user-id="{{userId}}" user-store="{{userStore}}" path="/settings"></page-settings>
+            <page-report-setting title="Report" user-store="{{userStore}}" path="*"></page-report-setting>
+          </app-router>
+
+        </template>
+        <template is="dom-if" if="{{!isAuthenticated}}">
+          <page-login  user-id="{{userId}}"  is-authenticated="{{isAuthenticated}}"></page-login>
+        </template>
+
+      </paper-scroll-header-panel>
+
+
+    </paper-drawer-panel>
+
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'app-index',
+      properties: {
+        isAuthenticated: {
+          type: Boolean
+        },
+        socket: {
+          type: Object
+        },
+        title: {
+          type: String
+        },
+        userStore: {
+          type: String,
+          notify:true
+        },userId: {
+          type: String,
+          notify:true
+        }
+      },observers: [
+         'updateInfo(userId,store)'
+       ],
+       updateInfo: function(userId,store) {
+         console.log('page-index');
+         setLocalStorageUserInfo(userId,store);
+       },
+      //go url
+      goDashboard: function() {
+        location.href = "#!/dashboard";
+        document.querySelector("#paperDrawerPanel").closeDrawer();
+      },
+      goReport: function() {
+        location.href = "#!/";
+        document.querySelector("#paperDrawerPanel").closeDrawer();
+      },
+      goSettings: function() {
+        location.href = "#!/settings";
+        document.querySelector("#paperDrawerPanel").closeDrawer();
+      },
+      goLogout: function() {      
+        this.socket.removeAuthToken();    
+      },
+      ready: function() {
+        document.querySelector("#paperDrawerPanel").forceNarrow = true;
+      },
+      setUserInfo:function (uid,store) {
+        this.userId=uid;
+        this.userStore=store;
+      },
+      syncLocalStorageToUserInfo:function () {
+        this.userId=localStorage["userId"];
+        this.userStore=localStorage["userStore"];
+      },
+      cleanLocalStorageUserInfo:function () {
+        localStorage["userId"]="";
+        localStorage["userStore"]="";
+      },
+      setLocalStorageUserInfo:function (uid,store) {
+        localStorage["userId"]=uid;
+        localStorage["userStore"]=store;
+      },
+      attached: function() {
+
+        var self = this;
+        this.socket.on('connect', function(status) {
+          self.isAuthenticated = status.isAuthenticated;
+        });
+
+        window.addEventListener('storage', function(e) {
+          // In case the user logged in from a different tab
+          if (e.key == self.socket.options.authTokenName) {
+            if (self.isAuthenticated) {
+              if (!e.newValue) {
+                self.isAuthenticated = false;
+                cleanLocalStorageUserInfo();
+              }
+            } else if (e.newValue) {
+              self.socket.authenticate(e.newValue, function(err, authStatus) {
+                self.isAuthenticated = authStatus.isAuthenticated;
+              });
+            }
+          }
+        });
+
+        this.socket.on('removeAuthToken', function() {
+          self.isAuthenticated = false;
+          self.cleanLocalStorageUserInfo();
+          location.reload();
+        });
+ 
+
+        this.syncLocalStorageToUserInfo();
+
+      }
+
+    });
+  </script>
+
+</dom-module>

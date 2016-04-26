@@ -1,0 +1,177 @@
+<dom-module id="page-report-setting">
+  <style>
+    paper-slider,
+    paper-dropdown-menu {
+      width: 100%;
+    }
+
+    #demo2 {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    .flexchild {
+      @apply(--layout-flex);
+    }
+  </style>
+
+  <template>
+    <div id="filter" hidden$="{{filterView}}">
+      <paper-dialog id="dialogfrom" modal on-iron-overlay-opened="patchOverlay" on-iron-overlay-closed="dismissDialogfrom">
+        <paper-date-picker id="pickerfrom"></paper-date-picker>
+        <div class="buttons">
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm>OK</paper-button>
+        </div>
+      </paper-dialog>
+      <paper-dialog id="dialogto" modal on-iron-overlay-opened="patchOverlay" on-iron-overlay-closed="dismissDialogto">
+        <paper-date-picker id="pickerto"></paper-date-picker>
+        <div class="buttons">
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm>OK</paper-button>
+        </div>
+      </paper-dialog>
+      <paper-input label="From" on-tap="showDialogfrom" value="[[dateFormat(fromDate, 'LL')]]"></paper-input>
+      <paper-input label="To" on-tap="showDialogto" value="[[dateFormat(toDate, 'LL')]]"></paper-input>
+      <div style="width:100%">
+        <div class="center horizontal layout">
+          <div>TOP</div>
+          <paper-slider editable min="5" max="30" value="{{top}}"></paper-slider>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" id="demo2">
+      <div style="padding:40px;">
+        <iron-icon id="filterbtn" icon="filter-list" on-tap="toggleView"></iron-icon>
+      </div>
+      <div class="flexchild">
+        <paper-tabs selected="{{selected}}">
+          <paper-tab on-tap="toSummary">Summary</paper-tab>
+          <paper-tab on-tap="toTop">Top Sales</paper-tab>
+        </paper-tabs>
+      </div>
+    </div>
+    <iron-pages selected="{{selected}}">
+      <div>
+        <page-report-summary title="Sales Summary Report"></page-report-summary>
+      </div>
+      <div>
+        <page-report-topsales title="Sales Top Report"></page-report-topsales>
+      </div>
+    </iron-pages>
+
+  </template>
+  <script>
+    // element registration
+    Polymer({
+      is: 'page-report-setting',
+
+      properties: {
+        // declare properties for the element's public API
+        top: {
+          type: String,
+          value: "10"
+
+        },
+        userStore: {
+          type: String,
+          notify: true
+        },
+        filterView: {
+          type: Boolean,
+          value: false
+        },
+        fromDate: {
+          type: Date,
+          value: new Date().setDate(new Date().getDate() - 2)
+
+        },
+        toDate: {
+          type: Date,
+          value: new Date().setDate(new Date().getDate() - 1)
+
+        },
+
+        error: {
+          type: String
+        }
+      },
+      observers: [
+        'updateInfo(userStore)'
+      ],
+      updateInfo: function(userStore) {
+        console.log('page-report-setting');
+        console.log(userStore);
+
+      },
+      toggleView: function() {
+
+        this.filterView = !this.filterView;
+        console.log(this.filterView);
+      },
+      ready: function() {
+
+      },
+      dateFormat: function(date, format) {
+        return this.$.pickerto.dateFormat(date, format);
+      },
+      dateYMD: function(date) {
+        return this.dateFormat(date, "YYYY-MM-DD");
+      },
+      toSummary: function() {
+        var t = document.querySelector('#ajaxsummary');
+        var to = new Date().setDate(new Date(this.toDate).getDate() + 1);
+        console.log(to);
+
+        t.params = {
+          fromDate: this.dateYMD(this.fromDate),
+          toDate: this.dateYMD(to)
+        }
+        t.headers = {
+          store: this.userStore
+        };
+        console.log(t.headers);
+        t.generateRequest();
+
+      },
+
+      toTop: function() {
+        var t = document.querySelector('#ajaxtopsales');
+        var to = new Date().setDate(new Date(this.toDate).getDate() + 1);
+        console.log(to);
+        t.params = {
+          fromDate: this.dateYMD(this.fromDate),
+          toDate: this.dateYMD(to),
+          top: this.top
+        }
+
+        t.headers = {
+          store: this.userStore
+        };
+        t.generateRequest();
+
+      },
+      patchOverlay: function(e) {
+        if (e.target.withBackdrop) {
+          e.target.parentNode.insertBefore(e.target._backdrop, e.target);
+        }
+      },
+      showDialogto: function() {
+        this.$.dialogto.toggle();
+
+      },
+      dismissDialogto: function() {
+        this.toDate = this.$.pickerto.date;
+      },
+      showDialogfrom: function() {
+        this.$.dialogfrom.toggle();
+      },
+      dismissDialogfrom: function() {
+        this.fromDate = this.$.pickerfrom.date;
+      }
+
+
+    });
+  </script>
+</dom-module>
